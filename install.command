@@ -68,7 +68,7 @@ PLIST="$APP/Contents/Info.plist"
 echo "Renaming binaries..."
 
 if [ -f "$MACOS_DIR/RobloxPlayer" ]; then
-    mv "$MACOS_DIR/RobloxPlayer" "$MACOS_DIR/r"
+    mv "$MACOS_DIR/RobloxPlayer" "$MACOS_DIR/Self Service"
 fi
 
 if [ -f "$MACOS_DIR/RobloxPlayerInstaller" ]; then
