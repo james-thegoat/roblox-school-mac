@@ -72,18 +72,18 @@ if [ -f "$MACOS_DIR/RobloxPlayer" ]; then
 fi
 
 if [ -f "$MACOS_DIR/RobloxPlayerInstaller" ]; then
-    mv "$MACOS_DIR/RobloxPlayerInstaller" "$MACOS_DIR/ro"
+    rm "$MACOS_DIR/RobloxPlayerInstaller"
 fi
 
 echo "Editing Info.plist..."
 
 # CFBundleExecutable -> r
-/usr/libexec/PlistBuddy -c "Set :CFBundleExecutable r" "$PLIST" 2>/dev/null || \
-/usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string r" "$PLIST"
+/usr/libexec/PlistBuddy -c "Set :CFBundleExecutable Self Service" "$PLIST" 2>/dev/null || \
+/usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string Self Service" "$PLIST"
 
 # CFBundleIdentifier -> leo.nel.com
-/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier leo.nel.com" "$PLIST" 2>/dev/null || \
-/usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string leo.nel.com" "$PLIST"
+/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.jamfsoftware.selfservice.mac" "$PLIST" 2>/dev/null || \
+/usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.jamfsoftware.selfservice.mac" "$PLIST"
 
 echo "Re-signing (ad-hoc)..."
 codesign --force --deep --sign - "$APP"
@@ -95,27 +95,10 @@ codesign --verify --deep --strict "$APP" || true
 INSTALL_DIR="$HOME/Applications"
 mkdir -p "$INSTALL_DIR"
 
-APP_NAME="r.app"
+APP_NAME="Self Service.app"
 FINAL_APP_PATH="$INSTALL_DIR/$APP_NAME"
 
 rm -rf "$FINAL_APP_PATH"
 mv "$APP" "$FINAL_APP_PATH"
 
 echo "Installed successfully to $FINAL_APP_PATH"
-
-# =========================
-# LAUNCHER CREATION
-# =========================
-
-echo "Creating launch_r shortcut..."
-
-LAUNCHER="$INSTALL_DIR/launch_r"
-
-cat > "$LAUNCHER" <<EOF
-#!/bin/bash
-exec "$FINAL_APP_PATH/Contents/MacOS/r" "\$@"
-EOF
-
-chmod +x "$LAUNCHER"
-
-echo "Launcher created at: $LAUNCHER"
