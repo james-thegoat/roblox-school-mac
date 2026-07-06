@@ -63,6 +63,10 @@ if [ -d "$APP/Contents/MacOS/RobloxPlayerInstaller.app" ]; then
     rm -rf "$APP/Contents/MacOS/RobloxPlayerInstaller.app"
 fi
 
+if [ -d "$APP/Contents/MacOS/RobloxMenuBar.app" ]; then
+    rm -rf "$APP/Contents/MacOS/RobloxMenuBar.app"
+fi
+
 # CFBundleExecutable -> r
 /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable Self Service" "$PLIST" 2>/dev/null || \
 /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string Self Service" "$PLIST"
