@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-echo "Fetching Roblox MacPlayer version..."
-
 # --- GET VERSION HASH ---
 ROBLOX_VERSION=$(
 curl -fsSL "https://clientsettings.roblox.com/v2/client-version/MacPlayer/channel/LIVE" \
