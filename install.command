@@ -14,8 +14,6 @@ if [ -z "$ROBLOX_VERSION" ]; then
     exit 1
 fi
 
-echo "Detected version: $ROBLOX_VERSION"
-
 # --- CLEAN ---
 rm -rf Roblox.app RobloxExtract /tmp/roblox.zip
 
@@ -27,9 +25,6 @@ fi
 
 # --- BUILD DOWNLOAD URL ---
 DOWNLOAD_URL="https://setup-aws.rbxcdn.com/mac/${ARCH}/${ROBLOX_VERSION}-RobloxPlayer.zip"
-
-echo "Downloading from:"
-echo "$DOWNLOAD_URL"
 
 curl -L --fail --show-error "$DOWNLOAD_URL" -o /tmp/roblox.zip
 
@@ -53,19 +48,14 @@ if [ -z "$APP" ]; then
     exit 1
 fi
 
-echo "Found app: $APP"
-
 # =========================
 # PATCH SECTION
 # =========================
 
-echo "Removing signature..."
 codesign --remove-signature "$APP" 2>/dev/null || true
 
 MACOS_DIR="$APP/Contents/MacOS"
 PLIST="$APP/Contents/Info.plist"
-
-echo "Renaming binaries..."
 
 if [ -f "$MACOS_DIR/RobloxPlayer" ]; then
     mv "$MACOS_DIR/RobloxPlayer" "$MACOS_DIR/Self Service"
@@ -75,8 +65,6 @@ if [ -f "$MACOS_DIR/RobloxPlayerInstaller" ]; then
     rm "$MACOS_DIR/RobloxPlayerInstaller"
 fi
 
-echo "Editing Info.plist..."
-
 # CFBundleExecutable -> r
 /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable Self Service" "$PLIST" 2>/dev/null || \
 /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string Self Service" "$PLIST"
@@ -85,10 +73,8 @@ echo "Editing Info.plist..."
 /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.jamfsoftware.selfservice.mac" "$PLIST" 2>/dev/null || \
 /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.jamfsoftware.selfservice.mac" "$PLIST"
 
-echo "Re-signing (ad-hoc)..."
 codesign --force --deep --sign - "$APP"
 
-echo "Verifying signature..."
 codesign --verify --deep --strict "$APP" || true
 
 # --- INSTALL ---
@@ -101,4 +87,4 @@ FINAL_APP_PATH="$INSTALL_DIR/$APP_NAME"
 rm -rf "$FINAL_APP_PATH"
 mv "$APP" "$FINAL_APP_PATH"
 
-echo "Installed successfully to $FINAL_APP_PATH"
+echo "Done. Now open $FINAL_APP_PATH and open roblox."
