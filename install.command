@@ -60,7 +60,7 @@ if [ -f "$MACOS_DIR/RobloxPlayer" ]; then
 fi
 
 if [ -f "$MACOS_DIR/RobloxPlayerInstaller" ]; then
-    rm "$MACOS_DIR/RobloxPlayerInstaller"
+    rm $MACOS_DIR/RobloxPlayerInstaller
 fi
 
 # CFBundleExecutable -> r
