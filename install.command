@@ -105,4 +105,4 @@ defaults write com.apple.dock persistent-apps -array-add \
 
 killall Dock
 
-echo "Done. It is installed in $FINAL_APP_PATH"
+echo "Done. It should be in your dock now so just open it from there"
