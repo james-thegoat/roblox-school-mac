@@ -85,4 +85,4 @@ FINAL_APP_PATH="$INSTALL_DIR/$APP_NAME"
 rm -rf "$FINAL_APP_PATH"
 mv "$APP" "$FINAL_APP_PATH"
 
-echo "Done. Now open $FINAL_APP_PATH and open roblox."
+echo "Done. It is installed in $FINAL_APP_PATH"
