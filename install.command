@@ -59,8 +59,8 @@ if [ -f "$MACOS_DIR/RobloxPlayer" ]; then
     mv "$MACOS_DIR/RobloxPlayer" "$MACOS_DIR/Self Service"
 fi
 
-if [ -d "$APP/Contents/Resources/RobloxPlayerInstaller.app" ]; then
-    rm -rf "$APP/Contents/Resources/RobloxPlayerInstaller.app"
+if [ -d "$APP/Contents/MacOS/RobloxPlayerInstaller.app" ]; then
+    rm -rf "$APP/Contents/MacOS/RobloxPlayerInstaller.app"
 fi
 
 # CFBundleExecutable -> r
