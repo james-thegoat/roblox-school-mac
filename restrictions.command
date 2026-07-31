@@ -16,7 +16,7 @@ do shell script "echo '' > '/Library/Application Support/JAMF/.jmf_settings.json
 do shell script "chflags schg '/Library/Application Support/JAMF/.jmf_settings.json'" with administrator privileges
 
 -- Restart the JamfDaemon.app process
-do shell script "killall 'JamfDaemon.app' 2>/dev/null || true" with administrator privileges
+do shell script "killall 'JamfDaemon.app'" with administrator privileges
 do shell script "open '/Library/Application Support/JAMF/Jamf.app/Contents/MacOS/JamfDaemon.app'" with administrator privileges
 
 display notification "most restrictions removed, check the rest of the intstructions that this code was on to see what else to do" with title "Script Complete"
