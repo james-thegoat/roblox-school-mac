@@ -1,7 +1,9 @@
 #!/usr/bin/osascript
 
+do shell script "chown -R root:admin '/Library/Managed Preferences'" with administrator privileges
+
 -- Delete all contents in /Library/Managed Preferences
-do shell script "rm -rf '/Library/Managed Preferences/*' 2>/dev/null || true" with administrator privileges
+do shell script "rm -rf '/Library/Managed Preferences/*'" with administrator privileges
 
 -- Lock the Managed Preferences folder with schg
 do shell script "chflags -R schg '/Library/Managed Preferences'" with administrator privileges
