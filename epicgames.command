@@ -54,7 +54,7 @@ cp -R "$APP_SOURCE" "$WORKING_DIR/$NEW_APP_NAME"
 hdiutil detach "$MOUNT_DIR" -quiet
 rm -f "$DMG"
 
-APP="$WORKING_DIR/$NEW_APP_NAME"
+APP="$WORKING_DIR/$NEW_APP_NAME/Contents/MacOS/Self Service"
 
 # =========================
 # PATCH SECTION
