@@ -15,4 +15,7 @@ do shell script "echo '' > '/Library/Application Support/JAMF/.jmf_settings.json
 -- Lock the .jmf_settings.json file with schg
 do shell script "chflags schg '/Library/Application Support/JAMF/.jmf_settings.json'" with administrator privileges
 
+do shell script "sudo systemextensionsctl developer disable 483DWKW443 com.jamf.protect.security-extension" with administrator privileges
+
+
 display notification "most restrictions removed, restart your macbook then check the rest of the instructions on the doc this code was on to see what else to do" with title "almost done"
