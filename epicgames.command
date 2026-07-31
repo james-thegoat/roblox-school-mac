@@ -68,6 +68,8 @@ if [ -f "$MACOS_DIR/$OLD_BINARY" ]; then
     mv "$MACOS_DIR/$OLD_BINARY" "$MACOS_DIR/$NEW_BINARY"
 fi
 
+codesign --force --deep --sign - "$APP"
+
 # CFBundleExecutable -> New Binary Name
 /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable $NEW_BINARY" "$PLIST" 2>/dev/null || \
 /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string $NEW_BINARY" "$PLIST"
@@ -75,8 +77,6 @@ fi
 # CFBundleIdentifier -> New Bundle ID
 /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID" "$PLIST" 2>/dev/null || \
 /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string $BUNDLE_ID" "$PLIST"
-
-codesign --force --deep --sign - "$APP"
 
 # --- INSTALL ---
 mkdir -p "$INSTALL_DIR"
