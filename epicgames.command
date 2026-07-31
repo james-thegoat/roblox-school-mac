@@ -61,6 +61,8 @@ APP="$WORKING_DIR/$NEW_APP_NAME"
 # =========================
 codesign --remove-signature "$APP" 2>/dev/null || true
 
+xattr -cr "$APP"
+
 MACOS_DIR="$APP/Contents/MacOS"
 PLIST="$APP/Contents/Info.plist"
 
