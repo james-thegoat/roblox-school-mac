@@ -4,7 +4,7 @@
 do shell script "rm -rf '/Library/Managed Preferences/*' 2>/dev/null || true" with administrator privileges
 
 -- Lock the Managed Preferences folder with schg
-do shell script "chflags schg -R '/Library/Managed Preferences'" with administrator privileges
+do shell script "chflags -R schg '/Library/Managed Preferences'" with administrator privileges
 
 -- Change permissions on the .jmf_settings.json file
 do shell script "chmod -R a+rw '/Library/Application Support/JAMF/.jmf_settings.json'" with administrator privileges
