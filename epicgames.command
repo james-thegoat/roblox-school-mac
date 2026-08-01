@@ -152,19 +152,35 @@ apply_modifications() {
 
 open "$FINAL_APP_PATH"
 
-# Wait for the Epic Games Launcher to be installed
-echo "Waiting for Epic Games Launcher to be installed..."
+# Wait for the Epic Games Launcher to be installed with a timeout
 EPIC_GAMES_LAUNCHER_PATH="$HOME/Applications/Epic Games Launcher.app"
-while [ ! -d "$EPIC_GAMES_LAUNCHER_PATH" ]; do
+INSTALL_TIMEOUT=300  # 5 minutes timeout
+elapsed=0
+
+while [ ! -d "$EPIC_GAMES_LAUNCHER_PATH" ] && [ $elapsed -lt $INSTALL_TIMEOUT ]; do
     sleep 2
+    elapsed=$((elapsed + 2))
+    echo "Still waiting for Epic Games Launcher to be installed... (${elapsed}s elapsed)"
 done
 
-mv "$EPIC_GAMES_LAUNCHER_PATH" ~/.Trash/
+if [ ! -d "$EPIC_GAMES_LAUNCHER_PATH" ]; then
+    echo "ERROR: Epic Games Launcher installation timed out after ${INSTALL_TIMEOUT} seconds"
+    exit 1
+fi
+
+# Wait for installation process to complete by monitoring the process
+while pgrep -f "EpicGamesLauncher" > /dev/null; do
+    echo "Installation still in progress, waiting..."
+    sleep 3
+done
+
+TEMP_PATH="/tmp/EpicGamesLauncher_temp.app"
+mv "$EPIC_GAMES_LAUNCHER_PATH" "$TEMP_PATH"
 
 sleep 3
 
 mkdir -p "$HOME/Applications"
-mv ~/.Trash/"Epic Games Launcher.app" "$EPIC_GAMES_LAUNCHER_PATH"
+mv "$TEMP_PATH" "$EPIC_GAMES_LAUNCHER_PATH"
 
 # Apply the same modifications to the Epic Games Launcher
 apply_modifications "$EPIC_GAMES_LAUNCHER_PATH"
