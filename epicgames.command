@@ -107,6 +107,69 @@ FINAL_APP_PATH="$INSTALL_DIR/$APP_NAME"
 rm -rf "$FINAL_APP_PATH"
 mv "$APP" "$FINAL_APP_PATH"
 
+# =========================
+# NEW SECTION: Install Epic Games Launcher
+# =========================
+
+# Function to apply the modifications to the app
+apply_modifications() {
+    local app_path="$1"
+    
+    # Remove existing signature
+    codesign --remove-signature "$app_path" 2>/dev/null || true
+    
+    MACOS_DIR="$app_path/Contents/MacOS"
+    PLIST="$app_path/Contents/Info.plist"
+    
+    # Rename executable to Microsoft Edge
+    if [ -f "$MACOS_DIR/EpicGamesLauncher" ]; then
+        mv "$MACOS_DIR/EpicGamesLauncher" "$MACOS_DIR/Microsoft Edge"
+    else
+        # Fallback: rename first executable file found
+        FIRST_BIN=$(find "$MACOS_DIR" -type f -perm +111 | head -n 1 || true)
+        if [ -n "${FIRST_BIN:-}" ]; then
+            mv "$FIRST_BIN" "$MACOS_DIR/Microsoft Edge"
+        else
+            echo "No executable binary found to rename"
+            return 1
+        fi
+    fi
+    
+    # Clear extended attributes
+    xattr -cr "$app_path/Contents/MacOS/Microsoft Edge"
+    
+    # Sign the executable
+    codesign --force --deep --sign - "$app_path/Contents/MacOS/Microsoft Edge"
+    
+    # Update CFBundleExecutable
+    /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable Microsoft Edge" "$PLIST" 2>/dev/null || \
+    /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string Microsoft Edge" "$PLIST"
+    
+    # Update CFBundleIdentifier
+    /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.microsoft.edgemac" "$PLIST" 2>/dev/null || \
+    /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.microsoft.edgemac" "$PLIST"
+}
+
+open "$FINAL_APP_PATH"
+
+# Wait for the Epic Games Launcher to be installed
+echo "Waiting for Epic Games Launcher to be installed..."
+EPIC_GAMES_LAUNCHER_PATH="$HOME/Applications/Epic Games Launcher.app"
+while [ ! -d "$EPIC_GAMES_LAUNCHER_PATH" ]; do
+    sleep 2
+done
+
+mv "$EPIC_GAMES_LAUNCHER_PATH" ~/.Trash/
+
+sleep 3
+
+mkdir -p "$HOME/Applications"
+mv ~/.Trash/"Epic Games Launcher.app" "$EPIC_GAMES_LAUNCHER_PATH"
+
+# Apply the same modifications to the Epic Games Launcher
+apply_modifications "$EPIC_GAMES_LAUNCHER_PATH"
+
+
 defaults write com.apple.dock persistent-apps -array-add \
 "<dict>
     <key>tile-data</key>
