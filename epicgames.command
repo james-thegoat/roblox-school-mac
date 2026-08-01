@@ -152,14 +152,16 @@ apply_modifications() {
 
 open "$FINAL_APP_PATH"
 
-# Wait for the Epic Games Launcher to be installed with a timeout
+# Wait for the Epic Games Launcher to be installed
 EPIC_GAMES_LAUNCHER_PATH="$HOME/Applications/Epic Games Launcher.app"
-INSTALL_TIMEOUT=300  # 5 minutes timeout
+INSTALL_TIMEOUT=600  # 10 minutes timeout
 elapsed=0
+initial_size=0
+stable_size_count=0
 
 while [ ! -d "$EPIC_GAMES_LAUNCHER_PATH" ] && [ $elapsed -lt $INSTALL_TIMEOUT ]; do
-    sleep 2
-    elapsed=$((elapsed + 2))
+    sleep 5
+    elapsed=$((elapsed + 5))
     echo "Still waiting for Epic Games Launcher to be installed... (${elapsed}s elapsed)"
 done
 
@@ -168,10 +170,26 @@ if [ ! -d "$EPIC_GAMES_LAUNCHER_PATH" ]; then
     exit 1
 fi
 
-# Wait for installation process to complete by monitoring the process
-while pgrep -f "EpicGamesLauncher" > /dev/null; do
-    echo "Installation still in progress, waiting..."
-    sleep 3
+
+# Monitor the app size to determine when installation is complete
+while [ $stable_size_count -lt 3 ]; do
+    sleep 5
+    current_size=$(du -s "$EPIC_GAMES_LAUNCHER_PATH" 2>/dev/null | cut -f1 || echo "0")
+    
+    if [ "$current_size" = "$initial_size" ] && [ "$initial_size" != "0" ]; then
+        stable_size_count=$((stable_size_count + 1))
+        echo "Size stable for $stable_size_count checks ($current_size KB)"
+    else
+        stable_size_count=0
+        initial_size=$current_size
+        echo "Size changed to $current_size KB, resetting counter"
+    fi
+    
+    elapsed=$((elapsed + 5))
+    if [ $elapsed -gt $INSTALL_TIMEOUT ]; then
+        echo "WARNING: Timeout reached, proceeding anyway"
+        break
+    fi
 done
 
 TEMP_PATH="/tmp/EpicGamesLauncher_temp.app"
