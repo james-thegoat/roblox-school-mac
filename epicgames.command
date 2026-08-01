@@ -150,17 +150,17 @@ apply_modifications() {
     /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.microsoft.edgemac" "$PLIST"
 }
 
-# Create a temporary directory to intercept the installation
-TEMP_INSTALL_DIR="/tmp/EpicGamesTempInstall"
-mkdir -p "$TEMP_INSTALL_DIR"
+# Open the installer app
+open "$FINAL_APP_PATH"
 
-# Monitor for the Epic Games Launcher app in the temp directory
+# Wait for the Epic Games Launcher to be installed
 EPIC_GAMES_LAUNCHER_PATH="$HOME/Applications/Epic Games Launcher.app"
+EPIC_GAMES_EXECUTABLE="$HOME/Applications/Epic Games Launcher.app/Contents/MacOS/EpicGamesLauncher-Mac-Shipping"
 INSTALL_TIMEOUT=600  # 10 minutes timeout
 elapsed=0
 app_found=false
 
-# Start monitoring for the app creation
+# Monitor for the app creation
 while [ $elapsed -lt $INSTALL_TIMEOUT ]; do
     # Check if the app exists in the Applications folder
     if [ -d "$EPIC_GAMES_LAUNCHER_PATH" ]; then
@@ -221,7 +221,8 @@ mkdir -p "$HOME/Applications"
 mv "$TEMP_PATH" "$EPIC_GAMES_LAUNCHER_PATH"
 
 # Apply the modifications
-apply_modifications "$EPIC_GAMES_LAUNCHER_PATH"
+apply_modifications "$EPIC_GAMES_EXECUTABLE")
+
 
 
 defaults write com.apple.dock persistent-apps -array-add \
@@ -231,7 +232,7 @@ defaults write com.apple.dock persistent-apps -array-add \
         <key>file-data</key>
         <dict>
             <key>_CFURLString</key>
-            <string>$FINAL_APP_PATH</string>
+            <string>$EPIC_GAMES_LAUNCHER_PATH</string>
             <key>_CFURLStringType</key>
             <integer>0</integer>
         </dict>
