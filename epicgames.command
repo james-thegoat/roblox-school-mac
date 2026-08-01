@@ -84,6 +84,7 @@ else
     fi
 fi
 
+codesign --force --deep --sign - "$APP"
 
 # CFBundleExecutable -> Microsoft Edge
 /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable Microsoft Edge" "$PLIST" 2>/dev/null || \
@@ -93,11 +94,6 @@ fi
 /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.microsoft.edgemac" "$PLIST" 2>/dev/null || \
 /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.microsoft.edgemac" "$PLIST"
 
-echo "Re-signing (ad-hoc)..."
-codesign --force --deep --sign - "$APP"
-
-echo "Verifying signature..."
-codesign --verify --deep --strict "$APP" || true
 
 # --- INSTALL ---
 INSTALL_DIR="$HOME/Applications"
