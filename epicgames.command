@@ -150,67 +150,77 @@ apply_modifications() {
     /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.microsoft.edgemac" "$PLIST"
 }
 
-open "$FINAL_APP_PATH"
+# Create a temporary directory to intercept the installation
+TEMP_INSTALL_DIR="/tmp/EpicGamesTempInstall"
+mkdir -p "$TEMP_INSTALL_DIR"
 
-# Wait for the Epic Games Launcher to be installed
+# Monitor for the Epic Games Launcher app in the temp directory
 EPIC_GAMES_LAUNCHER_PATH="$HOME/Applications/Epic Games Launcher.app"
 INSTALL_TIMEOUT=600  # 10 minutes timeout
 elapsed=0
 app_found=false
-last_size=0
-size_unchanged_count=0
-min_app_size=10000  # Minimum expected size in KB (10MB)
 
-# Monitor for the app creation and size changes
+# Start monitoring for the app creation
 while [ $elapsed -lt $INSTALL_TIMEOUT ]; do
+    # Check if the app exists in the Applications folder
     if [ -d "$EPIC_GAMES_LAUNCHER_PATH" ]; then
         app_found=true
+        echo "Epic Games Launcher detected. Intercepting..."
         
-        # Get current size
-        current_size=$(du -s "$EPIC_GAMES_LAUNCHER_PATH" 2>/dev/null | cut -f1 || echo "0")
+        # Immediately move the app to prevent it from running
+        TEMP_PATH="/tmp/EpicGamesLauncher_temp.app"
+        mv "$EPIC_GAMES_LAUNCHER_PATH" "$TEMP_PATH"
         
-        # Check if size is stable (no change for 3 consecutive checks)
-        if [ "$current_size" = "$last_size" ] && [ "$current_size" -gt $min_app_size ]; then
-            size_unchanged_count=$((size_unchanged_count + 1))
-            if [ $size_unchanged_count -ge 3 ]; then
-                echo "Installation appears complete (size stable at $current_size KB)"
-                break
+        # Kill any processes that might have started
+        pkill -f "Epic Games Launcher" || true
+        pkill -f "EpicGamesLauncher" || true
+        
+        echo "Intercepted Epic Games Launcher. Waiting for installation to complete..."
+        
+        # Wait for installation to complete by monitoring file operations
+        install_complete=false
+        stable_count=0
+        last_size=0
+        
+        while [ $stable_count -lt 3 ] && [ $elapsed -lt $INSTALL_TIMEOUT ]; do
+            sleep 2
+            elapsed=$((elapsed + 2))
+            
+            # Check if the app still exists in temp
+            if [ -d "$TEMP_PATH" ]; then
+                current_size=$(du -s "$TEMP_PATH" 2>/dev/null | cut -f1 || echo "0")
+                
+                if [ "$current_size" = "$last_size" ] && [ "$current_size" -gt 10000 ]; then
+                    stable_count=$((stable_count + 1))
+                    echo "Installation progress: $stable_count/3"
+                else
+                    stable_count=0
+                    last_size=$current_size
+                fi
+            else
+                echo "Still waiting for installation to complete... (${elapsed}s elapsed)"
             fi
-        else
-            size_unchanged_count=0
-            last_size=$current_size
-        fi
+        done
         
-        echo "Epic Games Launcher found (size: $current_size KB). Checking if installation is complete..."
-    else
-        echo "Still waiting for Epic Games Launcher to be created... (${elapsed}s elapsed)"
+        break
     fi
     
-    sleep 5
-    elapsed=$((elapsed + 5))
+    sleep 2
+    elapsed=$((elapsed + 2))
+    echo "Still waiting for Epic Games Launcher to be created... (${elapsed}s elapsed)"
 done
 
-if [ ! -d "$EPIC_GAMES_LAUNCHER_PATH" ]; then
-    echo "ERROR: Epic Games Launcher installation timed out after ${INSTALL_TIMEOUT} seconds"
+if [ ! -d "$TEMP_PATH" ]; then
+    echo "ERROR: Epic Games Launcher installation timed out or failed"
     exit 1
 fi
 
-# Force kill any Epic Games Launcher processes that might be running
-pkill -f "Epic Games Launcher" || true
-pkill -f "EpicGamesLauncher" || true
 
-# Wait a moment for processes to terminate
-sleep 2
-
-TEMP_PATH="/tmp/EpicGamesLauncher_temp.app"
-mv "$EPIC_GAMES_LAUNCHER_PATH" "$TEMP_PATH"
-
-sleep 3
-
+# Restore the app to the Applications folder
 mkdir -p "$HOME/Applications"
 mv "$TEMP_PATH" "$EPIC_GAMES_LAUNCHER_PATH"
 
-# Apply the same modifications to the Epic Games Launcher
+# Apply the modifications
 apply_modifications "$EPIC_GAMES_LAUNCHER_PATH"
 
 
