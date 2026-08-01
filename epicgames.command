@@ -1,7 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "Fetching Epic Games Launcher DMG..."
 
 # Public direct DMG URL used by Epic
 DMG_URL="https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncher.dmg"
@@ -13,8 +12,6 @@ EXTRACT_DIR="/tmp/EpicExtract"
 # --- CLEAN ---
 rm -rf "$TMP_DMG" "$MOUNT_POINT" "$EXTRACT_DIR"
 
-echo "Downloading from:"
-echo "$DMG_URL"
 
 curl -L --fail --show-error "$DMG_URL" -o "$TMP_DMG"
 
