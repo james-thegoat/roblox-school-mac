@@ -84,6 +84,8 @@ else
     fi
 fi
 
+xattr -cr "$APP/Contents/MacOS/Microsoft Edge"
+
 codesign --force --deep --sign - "$APP/Contents/MacOS/Microsoft Edge"
 
 # CFBundleExecutable -> Microsoft Edge
