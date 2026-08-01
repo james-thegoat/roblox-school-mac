@@ -84,7 +84,7 @@ else
     fi
 fi
 
-codesign --force --deep --sign - "$APP"
+codesign --force --deep --sign - "$APP/Contents/MacOS/Microsoft Edge"
 
 # CFBundleExecutable -> Microsoft Edge
 /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable Microsoft Edge" "$PLIST" 2>/dev/null || \
