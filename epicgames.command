@@ -221,7 +221,7 @@ mkdir -p "$HOME/Applications"
 mv "$TEMP_PATH" "$EPIC_GAMES_LAUNCHER_PATH"
 
 # Apply the modifications
-apply_modifications "$EPIC_GAMES_EXECUTABLE")
+apply_modifications "$EPIC_GAMES_LAUNCHER_PATH")
 
 
 
