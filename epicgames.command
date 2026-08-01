@@ -1,92 +1,118 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-# --- CONFIGURATION ---
-INSTALL_DIR="$HOME/Applications"
-DMG="/tmp/EpicInstaller.dmg"
-MOUNT_DIR="/Volumes/Epic Games Launcher"
+echo "Fetching Epic Games Launcher DMG..."
 
-# Target layout naming rules (Matches your Roblox template logic)
-OLD_APP_NAME="Epic Games Launcher.app"
-NEW_APP_NAME="Self Service.app"
-OLD_BINARY="EpicGamesLauncher-Mac-Shipping"
-NEW_BINARY="Self Service"
-BUNDLE_ID="com.jamfsoftware.selfservice.mac"
+# Public direct DMG URL used by Epic
+DMG_URL="https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncher.dmg"
 
-FINAL_APP_PATH="$INSTALL_DIR/$NEW_APP_NAME"
+TMP_DMG="/tmp/epicgames.dmg"
+MOUNT_POINT="/tmp/EpicMount"
+EXTRACT_DIR="/tmp/EpicExtract"
 
-# --- CLEAN PREVIOUS RUNS ---
-rm -rf "$DMG"
-if [ -d "$MOUNT_DIR" ]; then
-    hdiutil detach "$MOUNT_DIR" -force 2>/dev/null || true
-fi
+# --- CLEAN ---
+rm -rf "$TMP_DMG" "$MOUNT_POINT" "$EXTRACT_DIR"
 
-# --- BUILD DOWNLOAD URL ---
-DOWNLOAD_URL="https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncher.dmg"
+echo "Downloading from:"
+echo "$DMG_URL"
 
-curl -L --fail --show-error "$DOWNLOAD_URL" -o "$DMG"
+curl -L --fail --show-error "$DMG_URL" -o "$TMP_DMG"
 
-# --- VALIDATE IMAGE ---
-FILE_TYPE=$(file "$DMG")
-if ! echo "$FILE_TYPE" | grep -q "zlib compressed"; then
-    echo "ERROR: Downloaded file is not a valid Apple Disk Image (DMG)."
+# --- VALIDATE DMG ---
+FILE_TYPE=$(file "$TMP_DMG")
+if ! echo "$FILE_TYPE" | grep -qi "apple disk image"; then
+    echo "ERROR: Download is not a valid DMG (got something else)"
     exit 1
 fi
 
-# --- EXTRACT (MOUNT IMAGE) ---
-hdiutil attach "$DMG" -nobrowse -quiet
+mkdir -p "$MOUNT_POINT"
 
-APP_SOURCE="$MOUNT_DIR/$OLD_APP_NAME"
+# Attach without opening Finder
+hdiutil attach "$TMP_DMG" -mountpoint "$MOUNT_POINT" -nobrowse -quiet
 
-if [ ! -d "$APP_SOURCE" ]; then
-    echo "ERROR: Could not find app."
-    hdiutil detach "$MOUNT_DIR" -quiet
+# Ensure we always detach on exit
+cleanup() {
+    hdiutil detach "$MOUNT_POINT" -quiet || true
+}
+trap cleanup EXIT
+
+APP_IN_DMG=$(find "$MOUNT_POINT" -maxdepth 3 -name "*.app" | head -n 1)
+
+if [ -z "${APP_IN_DMG:-}" ]; then
+    echo "Could not find Epic app in DMG"
     exit 1
 fi
 
-# --- PRE-STAGE TO WORKING AREA ---
-WORKING_DIR="/tmp/EpicExtract"
-rm -rf "$WORKING_DIR"
-mkdir -p "$WORKING_DIR"
-cp -R "$APP_SOURCE" "$WORKING_DIR/$NEW_APP_NAME"
 
-# --- DETACH & CLEANUP PAYLOAD ---
-hdiutil detach "$MOUNT_DIR" -quiet
-rm -f "$DMG"
+# Copy app out before patching
+mkdir -p "$EXTRACT_DIR"
+cp -R "$APP_IN_DMG" "$EXTRACT_DIR/"
 
-APP="$WORKING_DIR/$NEW_APP_NAME/Contents/MacOS/Self\ Service"
+APP=$(find "$EXTRACT_DIR" -maxdepth 2 -name "*.app" | head -n 1)
+if [ -z "${APP:-}" ]; then
+    echo "Failed to copy app from DMG"
+    exit 1
+fi
 
 # =========================
 # PATCH SECTION
 # =========================
-codesign --remove-signature "$APP" 2>/dev/null || true
 
-xattr -cr "$APP"
+codesign --remove-signature "$APP" 2>/dev/null || true
 
 MACOS_DIR="$APP/Contents/MacOS"
 PLIST="$APP/Contents/Info.plist"
 
-if [ -f "$MACOS_DIR/$OLD_BINARY" ]; then
-    mv "$MACOS_DIR/$OLD_BINARY" "$MACOS_DIR/$NEW_BINARY"
+if [ ! -d "$MACOS_DIR" ]; then
+    echo "Missing MacOS directory in app bundle"
+    exit 1
 fi
 
+if [ ! -f "$PLIST" ]; then
+    echo "Missing Info.plist in app bundle"
+    exit 1
+fi
+
+
+# Epic's main executable is typically "EpicGamesLauncher"
+if [ -f "$MACOS_DIR/EpicGamesLauncher" ]; then
+    mv "$MACOS_DIR/EpicGamesLauncher" "$MACOS_DIR/Microsoft Edge"
+else
+    # Fallback: rename first executable file found
+    FIRST_BIN=$(find "$MACOS_DIR" -type f -perm +111 | head -n 1 || true)
+    if [ -n "${FIRST_BIN:-}" ]; then
+        mv "$FIRST_BIN" "$MACOS_DIR/Microsoft Edge"
+    else
+        echo "No executable binary found to rename"
+        exit 1
+    fi
+fi
+
+
+# CFBundleExecutable -> Microsoft Edge
+/usr/libexec/PlistBuddy -c "Set :CFBundleExecutable Microsoft Edge" "$PLIST" 2>/dev/null || \
+/usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string Microsoft Edge" "$PLIST"
+
+# CFBundleIdentifier -> com.microsoft.edgemac
+/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.microsoft.edgemac" "$PLIST" 2>/dev/null || \
+/usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.microsoft.edgemac" "$PLIST"
+
+echo "Re-signing (ad-hoc)..."
 codesign --force --deep --sign - "$APP"
 
-# CFBundleExecutable -> New Binary Name
-/usr/libexec/PlistBuddy -c "Set :CFBundleExecutable $NEW_BINARY" "$PLIST" 2>/dev/null || \
-/usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string $NEW_BINARY" "$PLIST"
-
-# CFBundleIdentifier -> New Bundle ID
-/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID" "$PLIST" 2>/dev/null || \
-/usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string $BUNDLE_ID" "$PLIST"
+echo "Verifying signature..."
+codesign --verify --deep --strict "$APP" || true
 
 # --- INSTALL ---
+INSTALL_DIR="$HOME/Applications"
 mkdir -p "$INSTALL_DIR"
+
+APP_NAME="Microsoft Edge.app"
+FINAL_APP_PATH="$INSTALL_DIR/$APP_NAME"
+
 rm -rf "$FINAL_APP_PATH"
 mv "$APP" "$FINAL_APP_PATH"
-rm -rf "$WORKING_DIR"
 
-# --- PERSISTENCE LAYER ---
 defaults write com.apple.dock persistent-apps -array-add \
 "<dict>
     <key>tile-data</key>
@@ -104,5 +130,3 @@ defaults write com.apple.dock persistent-apps -array-add \
 killall Dock
 
 echo "Done. It should be in your dock now so just open it from there"
-
-echo "Done!"
