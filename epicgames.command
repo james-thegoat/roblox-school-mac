@@ -156,10 +156,10 @@ open "$FINAL_APP_PATH"
 EPIC_GAMES_LAUNCHER_PATH="$HOME/Applications/Epic Games Launcher.app"
 INSTALL_TIMEOUT=600  # 10 minutes timeout
 elapsed=0
-
-# Create a lock file to prevent the app from being moved too early
-LOCK_FILE="/tmp/epic_launcher_install.lock"
-touch "$LOCK_FILE"
+app_created=false
+initial_size=0
+stable_size_count=0
+stable_size_threshold=3  # Number of consecutive checks with stable size
 
 # Function to check if installation is complete
 is_installation_complete() {
@@ -168,28 +168,41 @@ is_installation_complete() {
         return 1
     fi
     
-    # Check if the app is not being written to
-    if lsof +D "$EPIC_GAMES_LAUNCHER_PATH" 2>/dev/null | grep -q "REG"; then
-        echo "App is still being written to..."
-        return 1
-    fi
-    
-    # Check if the installer process is still running
-    if pgrep -f "EpicGamesLauncher" > /dev/null; then
-        echo "Installer process still running..."
-        return 1
-    fi
-    
     # Check if the app has all its expected components
     if [ ! -f "$EPIC_GAMES_LAUNCHER_PATH/Contents/MacOS/EpicGamesLauncher" ] && [ ! -f "$EPIC_GAMES_LAUNCHER_PATH/Contents/MacOS/Epic Games Launcher" ]; then
-        echo "Main executable not found yet..."
         return 1
     fi
     
-    return 0
+    # Check if the app size is stable (indicates installation is complete)
+    current_size=$(du -s "$EPIC_GAMES_LAUNCHER_PATH" 2>/dev/null | cut -f1 || echo "0")
+    
+    if [ "$current_size" = "$initial_size" ] && [ "$initial_size" != "0" ]; then
+        stable_size_count=$((stable_size_count + 1))
+        if [ $stable_size_count -ge $stable_size_threshold ]; then
+            return 0  # Installation is complete
+        fi
+    else
+        stable_size_count=0
+        initial_size=$current_size
+    fi
+    
+    return 1  # Installation not complete yet
 }
 
-# Wait for installation to complete
+# Wait for the app to be created first
+while [ ! -d "$EPIC_GAMES_LAUNCHER_PATH" ] && [ $elapsed -lt $INSTALL_TIMEOUT ]; do
+    sleep 5
+    elapsed=$((elapsed + 5))
+    echo "Still waiting for Epic Games Launcher to be created... (${elapsed}s elapsed)"
+done
+
+if [ ! -d "$EPIC_GAMES_LAUNCHER_PATH" ]; then
+    echo "ERROR: Epic Games Launcher installation timed out after ${INSTALL_TIMEOUT} seconds"
+    exit 1
+fi
+
+
+# Now wait for installation to complete
 while ! is_installation_complete && [ $elapsed -lt $INSTALL_TIMEOUT ]; do
     sleep 5
     elapsed=$((elapsed + 5))
@@ -199,9 +212,6 @@ done
 if ! is_installation_complete; then
     echo "WARNING: Installation may not be fully complete, but proceeding anyway..."
 fi
-
-# Remove the lock file
-rm -f "$LOCK_FILE"
 
 TEMP_PATH="/tmp/EpicGamesLauncher_temp.app"
 mv "$EPIC_GAMES_LAUNCHER_PATH" "$TEMP_PATH"
@@ -213,6 +223,7 @@ mv "$TEMP_PATH" "$EPIC_GAMES_LAUNCHER_PATH"
 
 # Apply the same modifications to the Epic Games Launcher
 apply_modifications "$EPIC_GAMES_LAUNCHER_PATH"
+
 
 defaults write com.apple.dock persistent-apps -array-add \
 "<dict>
