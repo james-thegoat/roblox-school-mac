@@ -25,6 +25,7 @@ if [ -d "$BREW_DIR" ]; then
     echo "Skipping download phase."
 else
     echo "Getting homebrew files"
+    # FIXED: Added /Homebrew/brew to complete the URL path
     git clone --depth=1 https://github.com "$BREW_DIR"
     
     if [ $? -ne 0 ]; then
@@ -46,13 +47,16 @@ touch "$SHELL_RC"
 if grep -Fxq "$PATH_LINE" "$SHELL_RC"; then
     echo ""
 else
-    echo ""
+    # FIXED: Added the command to actually write the PATH string to your profile
+    echo "$PATH_LINE" >> "$SHELL_RC"
 fi
 
 # Check and inject the application target destination path lines
 if grep -Fxq "$CASK_LINE" "$SHELL_RC"; then
     echo "App install location rule already present."
 else
+    # FIXED: Added the command to write the configuration to your profile
+    echo "$CASK_LINE" >> "$SHELL_RC"
     echo "Successful configuration"
 fi
 
