@@ -59,7 +59,6 @@ fi
   
 # Step 3: Rename the physical binary executable inside Contents/MacOS/
 if [ -f "$CONTENTS_DIR/MacOS/$OLD_EXE" ]; then
-    echo "⚙️  Renaming internal binary executable file..."
     mv "$CONTENTS_DIR/MacOS/$OLD_EXE" "$CONTENTS_DIR/MacOS/$CUSTOM_NAME"
 else
     echo "❌ Error: Internal binary target executable file not found."
