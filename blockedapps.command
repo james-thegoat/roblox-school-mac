@@ -31,8 +31,8 @@ if [ "$GUI_DATA" == "CANCELLED" ] || [ -z "$GUI_DATA" ]; then
 fi
 
 # Extract localized tracking variables
-ORIGINAL_PATH=$(echo "$GUI_DATA" | awk -F '|||' '{print $1}')
-CUSTOM_NAME=$(echo "$GUI_DATA" | awk -F '|||' '{print $2}')
+ORIGINAL_PATH=$(echo "$GUI_DATA" | cut -d'|' -f1)
+CUSTOM_NAME=$(echo "$GUI_DATA" | cut -d'|' -f4)
 
 if [ -z "$CUSTOM_NAME" ]; then
     echo "❌ Error: A custom application name is needed"
