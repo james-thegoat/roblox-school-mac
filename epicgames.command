@@ -153,75 +153,34 @@ apply_modifications() {
 # Open the installer app
 open "$FINAL_APP_PATH"
 
-# Wait for the Epic Games Launcher to be installed
 EPIC_GAMES_LAUNCHER_PATH="$HOME/Applications/Epic Games Launcher.app"
-EPIC_GAMES_EXECUTABLE="$HOME/Applications/Epic Games Launcher.app/Contents/MacOS/EpicGamesLauncher-Mac-Shipping"
-INSTALL_TIMEOUT=600  # 10 minutes timeout
-elapsed=0
-app_found=false
 
-# Monitor for the app creation
-while [ $elapsed -lt $INSTALL_TIMEOUT ]; do
-    # Check if the app exists in the Applications folder
-    if [ -d "$EPIC_GAMES_LAUNCHER_PATH" ]; then
-        app_found=true
-        echo "Epic Games Launcher detected. Intercepting..."
-        
-        # Immediately move the app to prevent it from running
-        TEMP_PATH="/tmp/EpicGamesLauncher_temp.app"
-        mv "$EPIC_GAMES_LAUNCHER_PATH" "$TEMP_PATH"
-        
-        # Kill any processes that might have started
-        pkill -f "Epic Games Launcher" || true
-        pkill -f "EpicGamesLauncher" || true
-        
-        echo "Intercepted Epic Games Launcher. Waiting for installation to complete..."
-        
-        # Wait for installation to complete by monitoring file operations
-        install_complete=false
-        stable_count=0
-        last_size=0
-        
-        while [ $stable_count -lt 3 ] && [ $elapsed -lt $INSTALL_TIMEOUT ]; do
-            sleep 2
-            elapsed=$((elapsed + 2))
-            
-            # Check if the app still exists in temp
-            if [ -d "$TEMP_PATH" ]; then
-                current_size=$(du -s "$TEMP_PATH" 2>/dev/null | cut -f1 || echo "0")
-                
-                if [ "$current_size" = "$last_size" ] && [ "$current_size" -gt 10000 ]; then
-                    stable_count=$((stable_count + 1))
-                    echo "Installation progress: $stable_count/3"
-                else
-                    stable_count=0
-                    last_size=$current_size
-                fi
-            else
-                echo "Still waiting for installation to complete... (${elapsed}s elapsed)"
-            fi
-        done
-        
-        break
-    fi
+# High-frequency loop checking every 0.1 seconds to kill the app before it opens
+for i in {1..2000}; do
+    # Continuously kill the launcher and helper processes before they can paint a window
+    pkill -f "Epic Games Launcher" || pkill -f "EpicGamesLauncher" || pkill -f "EpicWebHelper" || true
     
-    sleep 2
-    elapsed=$((elapsed + 2))
-    echo "Still waiting for Epic Games Launcher to be created... (${elapsed}s elapsed)"
+    if [ -d "$EPIC_GAMES_LAUNCHER_PATH" ]; then
+        # Check for file stability to ensure the installer finished writing data
+        last_size=$(du -s "$EPIC_GAMES_LAUNCHER_PATH" 2>/dev/null | cut -f1 || echo "0")
+        sleep 1.5
+        current_size=$(du -s "$EPIC_GAMES_LAUNCHER_PATH" 2>/dev/null | cut -f1 || echo "0")
+        
+        if [ "$current_size" = "$last_size" ] && [ "$current_size" -gt 10000 ]; then
+            echo "Installation completed and file size is stable."
+            break
+        fi
+    fi
+    sleep 0.1
 done
 
-if [ ! -d "$TEMP_PATH" ]; then
-    echo "ERROR: Epic Games Launcher installation timed out or failed"
-    exit 1
-fi
+# Final execution block safety wipe
+pkill -f "Epic Games Launcher" || pkill -f "EpicGamesLauncher" || true
+sleep 0.5
 
+# Apply your modifications function to the final app
+apply_modifications "$EPIC_GAMES_LAUNCHER_PATH"
 
-# Restore the app to the Applications folder
-mkdir -p "$HOME/Applications"
-mv "$TEMP_PATH" "$EPIC_GAMES_LAUNCHER_PATH"
-
-# Apply the modifications
-apply_modifications "$EPIC_GAMES_LAUNCHER_PATH")
 
 
 
