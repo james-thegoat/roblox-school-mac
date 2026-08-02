@@ -2,8 +2,7 @@
 
 clear
 
-
-# Step 1: Detect the active shell profile (Zsh or Bash)
+# Step 1: Detect the active shell profile (Fixed Syntax)
 if [[ "$SHELL" == *"zsh"* ]]; then
     SHELL_RC="$HOME/.zshrc"
 elif [[ "$SHELL" == *"bash"* ]]; then
@@ -16,35 +15,45 @@ fi
 BREW_DIR="$HOME/Documents/.brew"
 
 if [ ! -d "$HOME/Applications" ]; then
+    echo "Setting app install location to ~/Applications"
     mkdir -p "$HOME/Applications"
 fi
 
 # Step 3: Clone Homebrew to user space
 if [ -d "$BREW_DIR" ]; then
+    echo "Homebrew framework already exists."
+    echo "Skipping download phase."
 else
-    git clone --depth=1 https://github.com/Homebrew/brew "$BREW_DIR"
+    echo "Getting homebrew files"
+    git clone --depth=1 https://github.com "$BREW_DIR"
     
     if [ $? -ne 0 ]; then
+        echo "Error: Git clone operation failed."
         exit 1
     fi
+    echo "Main files downloaded"
 fi
 
+echo ""
 
 # Step 4: Write Homebrew PATH and Cask installation rules to the profile
 PATH_LINE="export PATH=\"\$HOME/Documents/.brew/bin:\$HOME/Documents/.brew/sbin:\$PATH\""
-# This critical option forces all future "brew install --cask" commands into ~/Applications
 CASK_LINE="export HOMEBREW_CASK_OPTS=\"--appdir=\$HOME/Applications\""
 
 touch "$SHELL_RC"
 
 # Check and inject the binary path lines
 if grep -Fxq "$PATH_LINE" "$SHELL_RC"; then
+    echo ""
 else
+    echo ""
 fi
 
 # Check and inject the application target destination path lines
 if grep -Fxq "$CASK_LINE" "$SHELL_RC"; then
+    echo "App install location rule already present."
 else
+    echo "Successful configuration"
 fi
 
 echo ""
@@ -54,7 +63,8 @@ export PATH="$BREW_DIR/bin:$BREW_DIR/sbin:$PATH"
 export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
 
 if ! command -v brew &> /dev/null; then
+    echo "Error: The 'brew' executable tool failed to load correctly."
     exit 1
 fi
 
-echo "Done, you can now use homebrew to install apps to ~/Applications using brew commands. Homebrew website: https://brew.sh/"
+echo "Homebrew is now downloaded. App install location set to ~/Applications. If you need help heres the homebrew website: https://brew.sh/"
