@@ -26,7 +26,7 @@ if [ -d "$BREW_DIR" ]; then
 else
     echo "Getting homebrew files"
     # FIXED: Added /Homebrew/brew to complete the URL path
-    git clone --depth=1 https://github.com "$BREW_DIR"
+    git clone --depth=1 https://github.com/Homebrew/brew "$BREW_DIR"
     
     if [ $? -ne 0 ]; then
         echo "Error: Git clone operation failed."
