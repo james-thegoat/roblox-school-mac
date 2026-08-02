@@ -76,9 +76,7 @@ codesign --force --deep --sign - "$FINAL_PATH" 2>/dev/null
 # Step 4: Write the new executable key configuration natively into Info.plist
 plutil -replace CFBundleExecutable -string "$CUSTOM_NAME" "$INFO_PLIST"
 
-# Step 5: Rename the outer wrapper directory inside the user's current directory workspace
-FINAL_PATH="$APP_DIR/$CUSTOM_NAME.app"
-mv "$ORIGINAL_PATH" "$FINAL_PATH"
+
 
 
 echo "Done, now just double click the app. Remember if it needs an update you have to download the app again and run this."
