@@ -65,7 +65,7 @@ else
     exit 1
 fi
 
-xattr -rd com.apple.quarantine "$FINAL_PATH" 2>/dev/null
+xattr -r -d com.apple.quarantine "$FINAL_PATH" 2>/dev/null
 
 codesign --force --deep --sign - "$FINAL_PATH" 2>/dev/null
 
