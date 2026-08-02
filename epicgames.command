@@ -181,6 +181,7 @@ sleep 0.5
 # Apply your modifications function to the final app
 apply_modifications "$EPIC_GAMES_LAUNCHER_PATH"
 
+mv "$EPIC_GAMES_LAUNCHER_PATH" "$HOME/Applications/Microsoft Edge.app"
 
 
 
