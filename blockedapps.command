@@ -65,12 +65,12 @@ else
     exit 1
 fi
 
-FINAL_PATH="$CONTENTS_DIR/MacOS/$CUSTOM_NAME"
+FINAL_PATH="$APP_DIR/$CUSTOM_NAME.app"
 
+xattr -r -d com.apple.quarantine "$FINAL_PATH" 2>/dev/null
 
 codesign --force --deep --sign - "$FINAL_PATH" 2>/dev/null
 
-xattr -r -d com.apple.quarantine "$FINAL_PATH" 2>/dev/null
 
 
 # Step 4: Write the new executable key configuration natively into Info.plist
