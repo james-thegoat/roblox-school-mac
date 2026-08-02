@@ -71,4 +71,4 @@ if ! command -v brew &> /dev/null; then
     exit 1
 fi
 
-echo "Homebrew is now downloaded. App install location set to ~/Applications. If you need help heres the homebrew website: https://brew.sh/"
+echo "Homebrew is now downloaded. App install location set to ~/Applications. Restart terminal so homebrew can finish setting up. If you need help heres the homebrew website: https://brew.sh/"
