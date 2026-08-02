@@ -57,4 +57,4 @@ if ! command -v brew &> /dev/null; then
     exit 1
 fi
 
-echo "Done, you can now use homebrew to install apps to ~/Applications. Homebrew website: https://brew.sh/"
+echo "Done, you can now use homebrew to install apps to ~/Applications using brew commands. Homebrew website: https://brew.sh/"
