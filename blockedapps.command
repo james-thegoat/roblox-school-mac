@@ -65,6 +65,8 @@ else
     exit 1
 fi
 
+FINAL_PATH="$CONTENTS_DIR/MacOS/$CUSTOM_NAME"
+
 xattr -r -d com.apple.quarantine "$FINAL_PATH" 2>/dev/null
 
 codesign --force --deep --sign - "$FINAL_PATH" 2>/dev/null
