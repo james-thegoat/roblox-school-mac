@@ -13,7 +13,7 @@ GUI_DATA=$(osascript <<EOF
             set posixPath to POSIX path of chosenFile
             
             -- Request the new custom string tag for the application
-            set nameResponse to display dialog "Enter the mandatory new name for the App & Executable (no extension):" default answer "" buttons {"Cancel", "Continue"} default button "Continue"
+            set nameResponse to display dialog "Enter the name you want for the App." default answer "" buttons {"Cancel", "Continue"} default button "Continue"
             set customName to text returned of nameResponse
             
             return posixPath & "|||" & customName
