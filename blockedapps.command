@@ -67,9 +67,11 @@ fi
 
 FINAL_PATH="$CONTENTS_DIR/MacOS/$CUSTOM_NAME"
 
-xattr -r -d com.apple.quarantine "$FINAL_PATH" 2>/dev/null
 
 codesign --force --deep --sign - "$FINAL_PATH" 2>/dev/null
+
+xattr -r -d com.apple.quarantine "$FINAL_PATH" 2>/dev/null
+
 
 # Step 4: Write the new executable key configuration natively into Info.plist
 plutil -replace CFBundleExecutable -string "$CUSTOM_NAME" "$INFO_PLIST"
