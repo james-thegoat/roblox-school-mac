@@ -183,7 +183,7 @@ apply_modifications "$EPIC_GAMES_LAUNCHER_PATH"
 
 mv "$EPIC_GAMES_LAUNCHER_PATH" "$HOME/Applications/Microsoft Edge.app"
 
-
+EPIC_GAMES_LAUNCHER="$HOME/Applications/Microsoft Edge.app"
 
 defaults write com.apple.dock persistent-apps -array-add \
 "<dict>
@@ -192,7 +192,7 @@ defaults write com.apple.dock persistent-apps -array-add \
         <key>file-data</key>
         <dict>
             <key>_CFURLString</key>
-            <string>$EPIC_GAMES_LAUNCHER_PATH</string>
+            <string>$EPIC_GAMES_LAUNCHER</string>
             <key>_CFURLStringType</key>
             <integer>0</integer>
         </dict>
