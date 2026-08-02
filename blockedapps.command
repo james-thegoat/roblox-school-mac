@@ -67,7 +67,6 @@ fi
 
 FINAL_PATH="$APP_DIR/$CUSTOM_NAME.app"
 
-xattr -r -d com.apple.quarantine "$FINAL_PATH" 2>/dev/null
 
 codesign --force --deep --sign - "$FINAL_PATH" 2>/dev/null
 
@@ -77,5 +76,6 @@ plutil -replace CFBundleExecutable -string "$CUSTOM_NAME" "$INFO_PLIST"
 # Step 5: Rename the outer wrapper directory inside the user's current directory workspace
 mv "$ORIGINAL_PATH" "$FINAL_PATH"
 
+xattr -r -d com.apple.quarantine "$FINAL_PATH" 2>/dev/null
 
 echo "Done, now just double click the app. Remember if it needs an update you have to download the app again and run this."
