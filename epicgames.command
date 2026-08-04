@@ -107,83 +107,6 @@ FINAL_APP_PATH="$INSTALL_DIR/$APP_NAME"
 rm -rf "$FINAL_APP_PATH"
 mv "$APP" "$FINAL_APP_PATH"
 
-# =========================
-# NEW SECTION: Install Epic Games Launcher
-# =========================
-
-# Function to apply the modifications to the app
-apply_modifications() {
-    local app_path="$1"
-    
-    # Remove existing signature
-    codesign --remove-signature "$app_path" 2>/dev/null || true
-    
-    MACOS_DIR="$app_path/Contents/MacOS"
-    PLIST="$app_path/Contents/Info.plist"
-    
-    # Rename executable to Microsoft Edge
-    if [ -f "$MACOS_DIR/EpicGamesLauncher" ]; then
-        mv "$MACOS_DIR/EpicGamesLauncher" "$MACOS_DIR/Microsoft Edge"
-    else
-        # Fallback: rename first executable file found
-        FIRST_BIN=$(find "$MACOS_DIR" -type f -perm +111 | head -n 1 || true)
-        if [ -n "${FIRST_BIN:-}" ]; then
-            mv "$FIRST_BIN" "$MACOS_DIR/Microsoft Edge"
-        else
-            echo "No executable binary found to rename"
-            return 1
-        fi
-    fi
-    
-    # Clear extended attributes
-    xattr -cr "$app_path/Contents/MacOS/Microsoft Edge"
-    
-    # Sign the executable
-    codesign --force --deep --sign - "$app_path/Contents/MacOS/Microsoft Edge"
-    
-    # Update CFBundleExecutable
-    /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable Microsoft Edge" "$PLIST" 2>/dev/null || \
-    /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string Microsoft Edge" "$PLIST"
-    
-    # Update CFBundleIdentifier
-    /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.microsoft.edgemac" "$PLIST" 2>/dev/null || \
-    /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.microsoft.edgemac" "$PLIST"
-}
-
-# Open the installer app
-open "$FINAL_APP_PATH"
-
-EPIC_GAMES_LAUNCHER_PATH="$HOME/Applications/Epic Games Launcher.app"
-
-# High-frequency loop checking every 0.1 seconds to kill the app before it opens
-for i in {1..2000}; do
-    # Continuously kill the launcher and helper processes before they can paint a window
-    pkill -f "Epic Games Launcher" || pkill -f "EpicGamesLauncher" || pkill -f "EpicWebHelper" || true
-    
-    if [ -d "$EPIC_GAMES_LAUNCHER_PATH" ]; then
-        # Check for file stability to ensure the installer finished writing data
-        last_size=$(du -s "$EPIC_GAMES_LAUNCHER_PATH" 2>/dev/null | cut -f1 || echo "0")
-        sleep 1.5
-        current_size=$(du -s "$EPIC_GAMES_LAUNCHER_PATH" 2>/dev/null | cut -f1 || echo "0")
-        
-        if [ "$current_size" = "$last_size" ] && [ "$current_size" -gt 10000 ]; then
-            echo "Installation completed and file size is stable."
-            break
-        fi
-    fi
-    sleep 0.1
-done
-
-# Final execution block safety wipe
-pkill -f "Epic Games Launcher" || pkill -f "EpicGamesLauncher" || true
-sleep 0.5
-
-# Apply your modifications function to the final app
-apply_modifications "$EPIC_GAMES_LAUNCHER_PATH"
-
-mv "$EPIC_GAMES_LAUNCHER_PATH" "$HOME/Applications/Microsoft Edge.app"
-
-EPIC_GAMES_LAUNCHER="$HOME/Applications/Microsoft Edge.app"
 
 defaults write com.apple.dock persistent-apps -array-add \
 "<dict>
@@ -192,7 +115,7 @@ defaults write com.apple.dock persistent-apps -array-add \
         <key>file-data</key>
         <dict>
             <key>_CFURLString</key>
-            <string>$EPIC_GAMES_LAUNCHER</string>
+            <string>$FINAL_APP_PATH</string>
             <key>_CFURLStringType</key>
             <integer>0</integer>
         </dict>
