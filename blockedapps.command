@@ -57,7 +57,6 @@ if [ -z "$OLD_EXE" ]; then
     exit 1
 fi
 
-
 # Step 3: Rename the physical binary executable inside Contents/MacOS/
 if [ -f "$CONTENTS_DIR/MacOS/$OLD_EXE" ]; then
     mv "$CONTENTS_DIR/MacOS/$OLD_EXE" "$CONTENTS_DIR/MacOS/$CUSTOM_NAME"
@@ -66,16 +65,15 @@ else
     exit 1
 fi
 
-FINAL_PATH="$APP_DIR/$CUSTOM_NAME.app"
-
-xattr -cr "$FINAL_PATH" 2>/dev/null
-codesign --force --deep --sign - "$FINAL_PATH" 2>/dev/null
+# Target the original path before the outer bundle folder is renamed
+xattr -cr "$ORIGINAL_PATH" 2>/dev/null
+codesign --force --deep --sign - "$ORIGINAL_PATH" 2>/dev/null
 
 # Step 4: Write the new executable key configuration natively into Info.plist
 plutil -replace CFBundleExecutable -string "$CUSTOM_NAME" "$INFO_PLIST"
 
 # Step 5: Rename the outer wrapper directory inside the user's current directory workspace
+FINAL_PATH="$APP_DIR/$CUSTOM_NAME.app"
 mv "$ORIGINAL_PATH" "$FINAL_PATH"
-
 
 echo "Done. You can now double-click the app. Remember if the app ever needs an update you need to download it again and redo this."
