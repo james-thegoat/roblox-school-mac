@@ -30,7 +30,7 @@ CUSTOM_NAME=$(osascript <<EOF
         on error
             return "CANCELLED"
         end try
-    </ tell
+    end tell
 EOF
 )
 
