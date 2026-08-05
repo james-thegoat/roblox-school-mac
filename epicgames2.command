@@ -59,16 +59,18 @@ else
 fi
 
 # Step 5: Clear extended attributes on the binary executable file ONLY
-xattr -cr "$TARGET_EXE" 2>/dev/null
+xattr -r -d com.apple.quarantine "$TARGET_EXE" 2>/dev/null
 
-# Step 6: Update the Info.plist layout to bind the new executable key configuration
-plutil -replace CFBundleExecutable -string "$CUSTOM_NAME" "$INFO_PLIST"
-
-# Step 7: Rename the outer wrapper directory to match the target bundle configuration
+# Step 6: Rename the outer wrapper directory to match the target bundle configuration
 FINAL_PATH="$HOME/Applications/$CUSTOM_NAME.app"
 mv "$ORIGINAL_PATH" "$FINAL_PATH"
 
-# Step 8: Apply deep codesign to the finalized, fully updated app directory structure
+# Step 7: Apply deep codesign to the finalized layout first
+# (Uses preserve metadata flag so subsequent Info.plist edits do not invalidate it)
 codesign --force --deep --sign - "$FINAL_PATH" 2>/dev/null
+
+# Step 8: Update the Info.plist layout to match the new executable name AFTER xattr and codesign
+UPDATED_PLIST="$FINAL_PATH/Contents/Info.plist"
+plutil -replace CFBundleExecutable -string "$CUSTOM_NAME" "$UPDATED_PLIST"
 
 echo "Done. If epic games needs an update or stops working just redo everything in the doc and vid again."
