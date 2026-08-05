@@ -58,19 +58,14 @@ else
     exit 1
 fi
 
-# Step 5: Update the Info.plist configuration metadata
-plutil -replace CFBundleExecutable -string "$CUSTOM_NAME" "$INFO_PLIST"
-
-# FIX: Explicitly grant executable permissions to the renamed binary
-chmod +x "$TARGET_EXE"
-
-# Step 6: Target the specific binary executable file first
+# Step 5: Clear extended attributes on the binary executable file ONLY
 xattr -cr "$TARGET_EXE" 2>/dev/null
-codesign --force --sign - "$TARGET_EXE" 2>/dev/null
 
-# Step 7: Apply to the entire outer application bundle structure 
-xattr -cr "$ORIGINAL_PATH" 2>/dev/null
+# Step 6: Apply codesign to the entire outer application bundle structure 
 codesign --force --deep --sign - "$ORIGINAL_PATH" 2>/dev/null
+
+# Step 7: Update the Info.plist configuration metadata after signing
+plutil -replace CFBundleExecutable -string "$CUSTOM_NAME" "$INFO_PLIST"
 
 # Step 8: Rename the outer .app wrapper directory
 FINAL_PATH="$HOME/Applications/$CUSTOM_NAME.app"
