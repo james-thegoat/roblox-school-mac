@@ -62,7 +62,7 @@ fi
 xattr -cr "$TARGET_EXE" 2>/dev/null
 
 # Step 6: Apply codesign to the entire outer application bundle structure 
-codesign --force --deep --sign - "$ORIGINAL_PATH" 2>/dev/null
+codesign --force --deep --sign - "$TARGET_EXE" 2>/dev/null
 
 # Step 7: Update the Info.plist configuration metadata after signing
 plutil -replace CFBundleExecutable -string "$CUSTOM_NAME" "$INFO_PLIST"
