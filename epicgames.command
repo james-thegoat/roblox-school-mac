@@ -124,4 +124,4 @@ defaults write com.apple.dock persistent-apps -array-add \
 
 killall Dock
 
-echo "Done. It should be in your dock now so just open it from there"
+echo "Done. It should be in your dock now so go to the doc or vid and see what to do next."
