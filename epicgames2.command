@@ -20,17 +20,17 @@ if [ ! -f "$INFO_PLIST" ]; then
     exit 1
 fi
 
-# Step 2: Request the new custom name via the terminal
-echo -n "What do you want to name the launcher:"
-read -r CUSTOM_NAME
+# Step 2: Loop until a non-blank name is provided
+CUSTOM_NAME=""
+while [ -z "$CUSTOM_NAME" ]; do
+    read -r -p "Enter the new name you want for the Epic Games Launcher: " CUSTOM_NAME
+    CUSTOM_NAME=$(echo "$CUSTOM_NAME" | xargs)
+    if [ -z "$CUSTOM_NAME" ]; then
+        echo "Error: Name cannot be blank."
+        echo ""
+    fi
+done
 
-# Remove trailing/leading whitespaces and validate input
-CUSTOM_NAME=$(echo "$CUSTOM_NAME" | xargs)
-
-if [ -z "$CUSTOM_NAME" ]; then
-    echo "Error: A name cannot be blank."
-    exit 1
-fi
 
 # Step 3: Query the current active internal executable binary name
 OLD_EXE=$(plutil -extract CFBundleExecutable raw "$INFO_PLIST")
