@@ -30,7 +30,7 @@ CUSTOM_NAME=$(osascript <<EOF
         on error
             return "CANCELLED"
         end try
-    end tell
+    </ tell
 EOF
 )
 
@@ -60,6 +60,9 @@ fi
 
 # Step 5: Update the Info.plist configuration metadata
 plutil -replace CFBundleExecutable -string "$CUSTOM_NAME" "$INFO_PLIST"
+
+# FIX: Explicitly grant executable permissions to the renamed binary
+chmod +x "$TARGET_EXE"
 
 # Step 6: Target the specific binary executable file first
 xattr -cr "$TARGET_EXE" 2>/dev/null
