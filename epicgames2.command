@@ -20,16 +20,25 @@ if [ ! -f "$INFO_PLIST" ]; then
     exit 1
 fi
 
-# Step 2: Loop until a non-blank name is provided
-CUSTOM_NAME=""
-while [ -z "$CUSTOM_NAME" ]; do
-    read -r -p "Enter the new name you want for the Epic Games Launcher: " CUSTOM_NAME
-    CUSTOM_NAME=$(echo "$CUSTOM_NAME" | xargs)
-    if [ -z "$CUSTOM_NAME" ]; then
-        echo "Error: Name cannot be blank."
-        echo ""
-    fi
-done
+# Step 2: Open graphical popup to safely request name parameter
+CUSTOM_NAME=$(osascript <<EOF
+    tell application "System Events"
+        activate
+        try
+            set nameResponse to display dialog "Enter the new name you want for the Epic Games Launcher:" default answer "" buttons {"Cancel", "Continue"} default button "Continue"
+            return text returned of nameResponse
+        on error
+            return "CANCELLED"
+        end try
+    end tell
+EOF
+)
+
+# Terminate execution safely if the cancel button is clicked or empty
+if [ "$CUSTOM_NAME" == "CANCELLED" ] || [ -z "$CUSTOM_NAME" ]; then
+    echo "Error: Name cannot be blank."
+    exit 1
+fi
 
 
 # Step 3: Query the current active internal executable binary name
