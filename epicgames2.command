@@ -58,17 +58,17 @@ else
     exit 1
 fi
 
-# Step 5: Clear extended attributes on the binary executable file ONLY
-xattr -cr "$TARGET_EXE" 2>/dev/null
-
-# Step 6: Apply codesign to the entire outer application bundle structure 
-codesign --force --deep --sign - "$TARGET_EXE" 2>/dev/null
-
-# Step 7: Update the Info.plist configuration metadata after signing
+# Step 5: Update the Info.plist configuration metadata
 plutil -replace CFBundleExecutable -string "$CUSTOM_NAME" "$INFO_PLIST"
 
-# Step 8: Rename the outer .app wrapper directory
+# Step 6: Clear extended attributes on the binary executable file ONLY
+xattr -cr "$TARGET_EXE" 2>/dev/null
+
+# Step 7: Rename the outer .app wrapper directory FIRST
 FINAL_PATH="$HOME/Applications/$CUSTOM_NAME.app"
 mv "$ORIGINAL_PATH" "$FINAL_PATH"
+
+# Step 8: Apply codesign to the final path so the signature matches the new name
+codesign --force --deep --sign - "$FINAL_PATH" 2>/dev/null
 
 echo "Done. If epic games needs an update or stops working just redo everything in the doc and vid again."
