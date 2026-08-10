@@ -12,7 +12,7 @@ else
 fi
 
 # Step 2: Establish the installation directories
-BREW_DIR="$HOME/Documents/.brew"
+BREW_DIR="$HOME/Downloads/.brew"
 
 if [ ! -d "$HOME/Applications" ]; then
     echo "Setting app install location to ~/Applications"
@@ -38,7 +38,7 @@ fi
 echo ""
 
 # Step 4: Write Homebrew PATH and Cask installation rules to the profile
-PATH_LINE="export PATH=\"\$HOME/Documents/.brew/bin:\$HOME/Documents/.brew/sbin:\$PATH\""
+PATH_LINE="export PATH=\"\$HOME/Downloads/.brew/bin:\$HOME/Documents/.brew/sbin:\$PATH\""
 CASK_LINE="export HOMEBREW_CASK_OPTS=\"--appdir=\$HOME/Applications\""
 
 touch "$SHELL_RC"
