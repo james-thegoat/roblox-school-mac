@@ -8,11 +8,11 @@ if userChoice is "Cancel" then
 end if
 
 try
-	do shell script "chflags -R noschg '/Library/Managed Preferences'" with administrator privileges
+	do shell script "sudo chflags -R noschg '/Library/Managed Preferences'" with administrator privileges
 
-	do shell script "chflags noschg '/Library/Application Support/JAMF/.jmf_settings.json'" with administrator privileges
+	do shell script "sudo chflags noschg '/Library/Application Support/JAMF/.jmf_settings.json'" with administrator privileges
 
-	do shell script "chmod -R 755 '/Library/Application Support/JAMF'" with administrator privileges
+	do shell script "sudo chmod -R 755 '/Library/Application Support/JAMF'" with administrator privileges
 
 
 	display notification "Management and restrictions are being restored." with title "Restart your mac"
