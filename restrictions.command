@@ -4,7 +4,7 @@ do shell script "sudo find '/Library/Managed Preferences' -mindepth 1 -delete" w
 
 do shell script "sudo chflags -R schg '/Library/Managed Preferences'" with administrator privileges
 
-do shell script "sudo chmod -R a+rw '/Library/Application Support/JAMF'" with administrator privileges
+do shell script "sudo chmod a+rw '/Library/Application Support/JAMF'" with administrator privileges
 
 do shell script "sudo chmod -R a+rw '/Library/Application Support/JAMF/.jmf_settings.json'" with administrator privileges
 
