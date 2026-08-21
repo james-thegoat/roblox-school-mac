@@ -16,6 +16,10 @@ try
 
     do shell script "sudo mv /var/db/auth.db.bak /var/db/auth.db"
 
+    do shell script "sudo jamf manage"
+
+    do shell script "sudo jamf policy"
+
 	display notification "Management and restrictions are being restored." with title "Restart your mac"
 	
 on error errMsg
