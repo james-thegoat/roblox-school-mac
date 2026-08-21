@@ -12,8 +12,9 @@ try
 
 	do shell script "sudo chflags noschg '/Library/Application Support/JAMF/.jmf_settings.json'" with administrator privileges
 
-	do shell script "sudo chmod -R 755 '/Library/Application Support/JAMF'" with administrator privileges
+    do shell script "sudo rm -rf /var/db/auth.db"
 
+    do shell script "sudo mv /var/db/auth.db.bak /var/db/auth.db"
 
 	display notification "Management and restrictions are being restored." with title "Restart your mac"
 	
