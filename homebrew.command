@@ -19,31 +19,23 @@ if [ ! -d "$HOME/Applications" ]; then
     mkdir -p "$HOME/Applications"
 fi
 
-# Step 3: Download Homebrew to user space
+# Step 3: Clone Homebrew to user space
 if [ -d "$BREW_DIR" ]; then
     echo "Homebrew framework already exists."
     echo "Skipping download phase."
 else
-    echo "Getting homebrew files..."
-    
-    # 1. Download the actual main branch ZIP payload to a temporary file
-    curl -L -o /tmp/brew.zip "https://github.com/Homebrew/brew"
+    echo "Getting homebrew files"
+    # FIXED: Added /Homebrew/brew to complete the URL path
+    git clone --depth=1 https://github.com/Homebrew/brew "$BREW_DIR"
     
     if [ $? -ne 0 ]; then
-        echo "Homebrew download failed."
+        echo "Error: Git clone operation failed."
         exit 1
     fi
-    
-    
-    # 2. Ensure target path exists, unzip the download, and strip the parent archive folder wrapper
-    mkdir -p "$BREW_DIR"
-    unzip -q /tmp/brew.zip -d /tmp/brew_extracted
-    mv /tmp/brew_extracted/brew-main/* "$BREW_DIR"
-    
-    # 3. Clean up the temporary workspace files
-    rm -rf /tmp/brew.zip /tmp/brew_extracted
-    
+    echo "Main files downloaded"
 fi
+
+echo ""
 
 # Step 4: Write Homebrew PATH and Cask installation rules to the profile
 PATH_LINE="export PATH=\"\$HOME/Downloads/.brew/bin:\$HOME/Documents/.brew/sbin:\$PATH\""
