@@ -4,7 +4,7 @@ set -e
 # --- GET VERSION HASH ---
 ROBLOX_VERSION=$(
 curl -fsSL "https://clientsettings.roblox.com/v2/client-version/MacPlayer/channel/LIVE" \
-| python3 -c "import sys, json; print(json.load(sys.stdin)['clientVersionUpload'])"
+| grep -o '"clientVersionUpload":"[^"]*"' | cut -d'"' -f4
 )
 
 if [ -z "$ROBLOX_VERSION" ]; then
