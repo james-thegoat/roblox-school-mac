@@ -12,6 +12,7 @@ if grep -Fxq "$LINE_TO_ADD" "$ZSHRC"; then
     echo "Already fixed"
 else
     # Append the line and source the file
+    echo "$LINE_TO_ADD" >> "$ZSHRC"
     echo "Xcode issue fixed. If the xcode issue comes back again just run this command again"
     source "$ZSHRC"
 fi
