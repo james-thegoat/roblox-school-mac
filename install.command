@@ -105,4 +105,4 @@ defaults write com.apple.dock persistent-apps -array-add \
 
 killall Dock
 
-echo "Done. It should be in your dock now so just open it from there. On the 12th of november a big change to this command and the drive is coming so read about it here, you need to read it https://docs.google.com/document/d/1E5FOxQgSFTt4hPSpnl9XcPhIwOxiiHZR50yQTMMQQSI/edit?tab=t.0 "
+echo "Done. It should be in your dock now so just open it from there. On the 12th of november a big change to this command and the drive is coming so read about it here, you need to read it so copy and paste link into a browser https://docs.google.com/document/d/1E5FOxQgSFTt4hPSpnl9XcPhIwOxiiHZR50yQTMMQQSI/edit?tab=t.0 "
