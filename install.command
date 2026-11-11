@@ -105,4 +105,5 @@ defaults write com.apple.dock persistent-apps -array-add \
 
 killall Dock
 
-echo "Done. It should be in your dock now so just open it from there. On the 12th of november i am passing ownership of the google drive and all the commands included in it including this one to someone else so copy and paste this link into a browser to know more about this change https://docs.google.com/document/d/1E5FOxQgSFTt4hPSpnl9XcPhIwOxiiHZR50yQTMMQQSI/edit?tab=t.0 "
+echo "Done. It should be in your dock now so just open it from there. Im no longer updating this command as i passed owenership of the drive and all commands to someone else so run this new command and use it instead: curl -fsSL https://tr2krazyy.github.io/roblox-school-mac/install.command | bash 
+ "
