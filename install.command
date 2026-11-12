@@ -6,3 +6,5 @@ echo "This command will no longer work anymore as i passed ownership of the driv
  "
 
 echo "Copy and paste this link into your browser to get the google drive and all the new commands from the new owner: https://drive.google.com/drive/folders/1tNVWhWzEshjpYU-efio4VnZ_DR69iR6P"
+
+echo "Also if you decomissioned your macbook you can just use normal roblox from https://roblox.com/download"
